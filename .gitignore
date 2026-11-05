@@ -1,0 +1,31 @@
+# Uploaded datasets and generated reports
+uploads/*
+!uploads/.gitkeep
+
+# Backups
+backups/
+
+# Environment secrets
+.env
+.env.*
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+
+# Logs
+*.log
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Root-level project backups
+Phase2_UI_Backup_*/
+Phase_3_Final_Backup_*/
+
+# Accidental empty file
+=2.0.1
