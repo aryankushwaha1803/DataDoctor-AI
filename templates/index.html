@@ -1,158 +1,644 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>DataDoctor AI | Intelligent Data Analysis</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
+
 <body>
 
+<!-- ================= NAVIGATION ================= -->
+
 <header class="navbar">
-    <div class="brand">🩺 DataDoctor <span>AI</span></div>
+    <a href="/" class="brand">
+        <span class="brand-icon">✚</span>
+        <span>DataDoctor <strong>AI</strong></span>
+    </a>
+
     <nav>
         <a href="#upload">Upload</a>
         <a href="#quality">Data Quality</a>
         <a href="#dashboard">Dashboard</a>
         <a href="#insights">AI Insights</a>
     </nav>
+
+    <a href="#upload" class="nav-cta">Get Started →</a>
 </header>
 
+
+<!-- ================= HERO SECTION ================= -->
+
 <section class="hero">
-    <p class="tag">YOUR INTELLIGENT DATA ANALYSIS PLATFORM</p>
-    <h1>Turn Raw Data Into <span>Smart Insights</span></h1>
-    <p>Upload your dataset. Discover problems, visualize patterns and clean your data.</p>
+
+    <div class="hero-content">
+
+        <div class="hero-label">
+            <span class="status-dot"></span>
+            INTELLIGENT DATA ANALYSIS PLATFORM
+        </div>
+
+        <h1>
+            Transform Your Raw Data
+            <span>Into Powerful Insights.</span>
+        </h1>
+
+        <p class="hero-description">
+            Analyze, clean, visualize and understand your datasets
+            with one intelligent data analysis platform.
+        </p>
+
+        <div class="hero-features">
+            <span>✓ Automated Data Quality</span>
+            <span>✓ Interactive Dashboards</span>
+            <span>✓ AI-Powered Insights</span>
+        </div>
+
+    </div>
+
+
+    <!-- UPLOAD AREA -->
 
     <div class="upload-box" id="upload">
+
+        <div class="upload-icon">↑</div>
+
         <h2>Upload Your Dataset</h2>
-        <p>Supported formats: CSV, XLSX, XLS</p>
-        <form action="/upload" method="POST" enctype="multipart/form-data">
-            <input type="file" name="file" accept=".csv,.xlsx,.xls" required>
-            <button type="submit">Analyze My Data →</button>
+
+        <p>
+            Start analyzing your data in seconds.
+            Upload a CSV or Excel file.
+        </p>
+
+        <form action="/upload"
+              method="POST"
+              enctype="multipart/form-data">
+
+            <input
+                type="file"
+                name="file"
+                accept=".csv,.xlsx,.xls"
+                required
+            >
+
+            <button type="submit">
+                Analyze My Dataset →
+            </button>
+
         </form>
+
+        <div class="upload-supported">
+            Supported formats: CSV · XLSX · XLS
+        </div>
+
     </div>
+
 </section>
+
+
+<!-- ================= MAIN CONTENT ================= -->
 
 <main class="container">
 
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert">{{ message }}</div>
-    {% endfor %}
-{% endif %}
-{% endwith %}
 
-{% if quality %}
+    <!-- FLASH MESSAGES -->
 
-<h2 class="section-title">Analysis Results</h2>
-<p class="filename">Dataset: {{ filename }}</p>
-
-<section class="cards" id="quality">
-    <div class="card"><h3>Total Rows</h3><strong>{{ quality.total_rows }}</strong></div>
-    <div class="card"><h3>Total Columns</h3><strong>{{ quality.total_columns }}</strong></div>
-    <div class="card"><h3>Missing Values</h3><strong>{{ quality.total_missing }}</strong></div>
-    <div class="card"><h3>Duplicate Rows</h3><strong>{{ quality.duplicate_rows }}</strong></div>
-</section>
-
-<section class="panel">
-    <h2>🩺 Data Quality Doctor</h2>
-    <h3>Missing values by column</h3>
-    <ul>
-    {% for column, count in quality.missing_values.items() %}
-        <li>{{ column }}: {{ count }}</li>
-    {% endfor %}
-    </ul>
-    <h3>Recommendations</h3>
-    <ul>
-    {% for recommendation in recommendations %}
-        <li>{{ recommendation }}</li>
-    {% endfor %}
-    </ul>
-    <h3>Outliers</h3>
-    <ul>
-    {% for column, count in quality.outliers.items() %}
-        <li>{{ column }}: {{ count }}</li>
-    {% endfor %}
-    </ul>
-</section>
-
-<section class="panel" id="dashboard">
-    <h2>📊 Auto Dashboard</h2>
-    <p>Numerical summary</p>
-    {% if dashboard.numeric_summary %}
-        {% for column, stats in dashboard.numeric_summary.items() %}
-            <h3>{{ column }}</h3>
-            <ul>
-            {% for stat, value in stats.items() %}
-                <li>{{ stat }}: {{ value }}</li>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert">
+                    <span>ℹ</span>
+                    {{ message }}
+                </div>
             {% endfor %}
-            </ul>
+        {% endif %}
+    {% endwith %}
+
+
+    {% if quality %}
+
+
+    <!-- ================= ANALYSIS HEADER ================= -->
+
+    <section class="analysis-header">
+
+        <div>
+            <div class="eyebrow">YOUR ANALYSIS OVERVIEW</div>
+
+            <h2>Dataset Analysis</h2>
+
+            <p>
+                Your dataset has been successfully processed.
+                Explore the results below.
+            </p>
+        </div>
+
+        <div class="dataset-badge">
+            <span class="dataset-badge-icon">▤</span>
+            <span>{{ filename }}</span>
+        </div>
+
+    </section>
+
+
+    <!-- ================= DATA QUALITY SUMMARY ================= -->
+
+    <section class="overview-section" id="quality">
+
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">DATA QUALITY DOCTOR</span>
+                <h2>Quality Overview</h2>
+                <p>A quick overview of your dataset health.</p>
+            </div>
+        </div>
+
+
+        <div class="cards">
+
+            <div class="card">
+                <div class="summary-icon blue">▤</div>
+                <h3>Total Rows</h3>
+                <strong>{{ quality.total_rows }}</strong>
+                <span class="card-caption">Dataset records</span>
+            </div>
+
+            <div class="card">
+                <div class="summary-icon purple">▦</div>
+                <h3>Total Columns</h3>
+                <strong>{{ quality.total_columns }}</strong>
+                <span class="card-caption">Dataset features</span>
+            </div>
+
+            <div class="card">
+                <div class="summary-icon orange">!</div>
+                <h3>Missing Values</h3>
+                <strong>{{ quality.total_missing }}</strong>
+                <span class="card-caption">Incomplete values</span>
+            </div>
+
+            <div class="card">
+                <div class="summary-icon red">⧉</div>
+                <h3>Duplicate Rows</h3>
+                <strong>{{ quality.duplicate_rows }}</strong>
+                <span class="card-caption">Repeated records</span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= DATA QUALITY DETAILS ================= -->
+
+    <section class="panel quality-panel">
+
+        <div class="panel-heading">
+            <div class="panel-icon">✚</div>
+
+            <div>
+                <span class="eyebrow">DATA HEALTH REPORT</span>
+                <h2>Data Quality Doctor</h2>
+                <p>Identify potential problems in your dataset.</p>
+            </div>
+        </div>
+
+
+        <div class="quality-grid">
+
+            <div class="quality-item">
+                <h3>Missing Values</h3>
+
+                <ul>
+                    {% for column, count in quality.missing_values.items() %}
+                        <li>
+                            <span>{{ column }}</span>
+                            <strong>{{ count }}</strong>
+                        </li>
+                    {% else %}
+                        <li>No missing-value information available.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+
+            <div class="quality-item">
+                <h3>Outlier Detection</h3>
+
+                <ul>
+                    {% for column, count in quality.outliers.items() %}
+                        <li>
+                            <span>{{ column }}</span>
+                            <strong>{{ count }}</strong>
+                        </li>
+                    {% else %}
+                        <li>No outlier information available.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+
+            <div class="quality-item recommendation-item">
+                <h3>Recommendations</h3>
+
+                <ul>
+                    {% for recommendation in recommendations %}
+                        <li>{{ recommendation }}</li>
+                    {% else %}
+                        <li>No recommendations available.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= AUTO DASHBOARD ================= -->
+
+    <section class="panel dashboard-section" id="dashboard">
+
+        <div class="panel-heading">
+            <div class="panel-icon dashboard-icon">▥</div>
+
+            <div>
+                <span class="eyebrow">AUTOMATED VISUAL ANALYTICS</span>
+                <h2>Interactive Dashboard</h2>
+                <p>Explore key performance indicators and visualizations.</p>
+            </div>
+        </div>
+
+
+        <!-- KPI CARDS -->
+
+        <div class="dd-kpi-grid">
+
+            {% for kpi in dashboard.kpis %}
+
+                <div class="dd-kpi-card">
+
+                    <div class="dd-kpi-top">
+                        <span class="dd-kpi-icon">{{ kpi.icon }}</span>
+                        <span class="dd-kpi-label">{{ kpi.label }}</span>
+                    </div>
+
+                    <div class="dd-kpi-value">
+                        {{ kpi.value }}
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- CHARTS -->
+
+        {% if dashboard.chart_html %}
+
+            <div class="chart-toolbar">
+
+                <div class="chart-heading">
+                    <div>
+                        <h3>Data Visualizations</h3>
+                        <p>Visual representation of your dataset.</p>
+                    </div>
+                </div>
+
+                {% if file_id %}
+                    <div class="dd-export-actions">
+
+                        <a class="dd-export-button dd-export-excel"
+                           href="{{ url_for('export_excel', file_id=file_id) }}">
+                            ↓ Download Excel
+                        </a>
+
+                        <a class="dd-export-button dd-export-pdf"
+                           href="{{ url_for('export_pdf', file_id=file_id) }}">
+                            ↓ Download PDF
+                        </a>
+
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            {{ dashboard.chart_html|safe }}
+
+        {% else %}
+
+            <div class="empty-state">
+                <span>📊</span>
+                <p>No suitable charts available for this dataset.</p>
+            </div>
+
+        {% endif %}
+
+
+        <!-- NUMERICAL SUMMARY -->
+
+        <div class="chart-heading">
+            <div>
+                <h3>Numerical Summary</h3>
+                <p>Statistical information about numerical columns.</p>
+            </div>
+        </div>
+
+
+        {% for column, stats in dashboard.numeric_summary.items() %}
+
+            <div class="statistics-block">
+
+                <h4>{{ column }}</h4>
+
+                <div class="table-wrap">
+
+                    <table class="data-table">
+
+                        <thead>
+                            <tr>
+                                <th>Statistic</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for stat, value in stats.items() %}
+                                <tr>
+                                    <td>{{ stat }}</td>
+                                    <td>{{ value }}</td>
+                                </tr>
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+                No numerical columns available.
+            </div>
+
         {% endfor %}
-    {% else %}
-        <p>No numerical columns available.</p>
-    {% endif %}
-</section>
 
-<section class="panel">
-    <h2>🔍 Pattern Discovery</h2>
-    <p>{{ patterns.message }}</p>
-    {% for column, values in patterns.correlations.items() %}
-        <h3>{{ column }}</h3>
-        <ul>
-        {% for other, value in values.items() %}
-            <li>{{ other }}: {{ value }}</li>
+    </section>
+
+
+    <!-- ================= PATTERN DISCOVERY ================= -->
+
+    <section class="panel pattern-panel">
+
+        <div class="panel-heading">
+
+            <div class="panel-icon pattern-icon">⌁</div>
+
+            <div>
+                <span class="eyebrow">ADVANCED DATA ANALYTICS</span>
+                <h2>Pattern Discovery</h2>
+                <p>Discover relationships and patterns in your data.</p>
+            </div>
+
+        </div>
+
+
+        <div class="pattern-message">
+            {{ patterns.message }}
+        </div>
+
+
+        {% for column, values in patterns.correlations.items() %}
+
+            <div class="correlation-block">
+
+                <h3>{{ column }}</h3>
+
+                <ul>
+                    {% for other, value in values.items() %}
+                        <li>
+                            <span>{{ other }}</span>
+                            <strong>{{ value }}</strong>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+            </div>
+
         {% endfor %}
-        </ul>
-    {% endfor %}
-</section>
 
-<section class="panel" id="insights">
-    <h2>🤖 AI Insights Assistant</h2>
-    <form action="/ask" method="POST">
-        <input type="hidden" name="file_id" value="{{ file_id }}">
-        <input type="text" name="question" placeholder="Ask about rows, columns, missing values..." required>
-        <button type="submit">Ask AI</button>
-    </form>
-    {% if answer %}
-        <div class="answer">{{ answer }}</div>
+    </section>
+
+
+    <!-- ================= AI INSIGHTS ================= -->
+
+    <section class="panel insights-panel" id="insights">
+
+        <div class="panel-heading">
+
+            <div class="panel-icon ai-icon">✧</div>
+
+            <div>
+                <span class="eyebrow">INTELLIGENT DATA ASSISTANT</span>
+                <h2>AI Insights Assistant</h2>
+                <p>Ask questions about your uploaded dataset.</p>
+            </div>
+
+        </div>
+
+
+        <form action="/ask" method="POST" class="ai-question-form">
+
+            <input type="hidden"
+                   name="file_id"
+                   value="{{ file_id }}">
+
+            <input
+                type="text"
+                name="question"
+                placeholder="Ask something about your dataset..."
+                required
+            >
+
+            <button type="submit">
+                Ask AI →
+            </button>
+
+        </form>
+
+
+        {% if answer %}
+
+            <div class="answer">
+
+                <div class="answer-heading">
+                    <span>✧</span>
+                    AI Response
+                </div>
+
+                <p>{{ answer }}</p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- ================= DATA CLEANING ================= -->
+
+    <section class="panel cleaning-panel">
+
+        <div class="panel-heading">
+
+            <div class="panel-icon cleaning-icon">⚙</div>
+
+            <div>
+                <span class="eyebrow">DATA PREPROCESSING</span>
+                <h2>Data Cleaning</h2>
+                <p>Prepare your dataset for better analysis.</p>
+            </div>
+
+        </div>
+
+
+        <form action="/clean" method="POST" class="cleaning-form">
+
+            <input type="hidden"
+                   name="file_id"
+                   value="{{ file_id }}">
+
+
+            <label class="clean-option">
+                <input type="checkbox"
+                       name="fill_missing"
+                       value="yes"
+                       checked>
+                <span>Fill missing values</span>
+            </label>
+
+
+            <label class="clean-option">
+                <input type="checkbox"
+                       name="remove_duplicates"
+                       value="yes">
+                <span>Remove duplicate rows</span>
+            </label>
+
+
+            <label class="clean-option">
+                <input type="checkbox"
+                       name="trim_text"
+                       value="yes"
+                       checked>
+                <span>Trim extra spaces</span>
+            </label>
+
+
+            <button type="submit">
+                Clean Dataset →
+            </button>
+
+        </form>
+
+
+        {% if clean_summary %}
+
+            <div class="cleaning-report">
+
+                <h3>Cleaning Report</h3>
+
+                <div class="clean-report-grid">
+
+                    <div>
+                        <span>Rows Before</span>
+                        <strong>{{ clean_summary.original_rows }}</strong>
+                    </div>
+
+                    <div>
+                        <span>Rows After</span>
+                        <strong>{{ clean_summary.cleaned_rows }}</strong>
+                    </div>
+
+                    <div>
+                        <span>Missing Before</span>
+                        <strong>{{ clean_summary.original_missing }}</strong>
+                    </div>
+
+                    <div>
+                        <span>Missing After</span>
+                        <strong>{{ clean_summary.cleaned_missing }}</strong>
+                    </div>
+
+                </div>
+
+
+                <h4>Changes Applied</h4>
+
+                <ul>
+                    {% for change in clean_summary.changes %}
+                        <li>{{ change }}</li>
+                    {% endfor %}
+                </ul>
+
+
+                <a class="download"
+                   href="/download/{{ download_file }}">
+                    ↓ Download Cleaned CSV
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- ================= DATASET PREVIEW ================= -->
+
+    <section class="panel preview-panel">
+
+        <div class="panel-heading">
+
+            <div class="panel-icon preview-icon">▤</div>
+
+            <div>
+                <span class="eyebrow">DATA EXPLORER</span>
+                <h2>Dataset Preview</h2>
+                <p>View a preview of your uploaded dataset.</p>
+            </div>
+
+        </div>
+
+
+        <div class="table-wrap dataset-preview">
+            {{ preview|safe }}
+        </div>
+
+    </section>
+
+
     {% endif %}
-</section>
 
-<section class="panel">
-    <h2>🧹 Data Cleaning</h2>
-    <form action="/clean" method="POST">
-        <input type="hidden" name="file_id" value="{{ file_id }}">
-        <label><input type="checkbox" name="fill_missing" value="yes" checked> Fill missing values</label><br>
-        <label><input type="checkbox" name="remove_duplicates" value="yes"> Remove duplicate rows</label><br>
-        <label><input type="checkbox" name="trim_text" value="yes" checked> Trim extra spaces</label><br><br>
-        <button type="submit">Clean Dataset</button>
-    </form>
-
-    {% if clean_summary %}
-        <h3>Cleaning Report</h3>
-        <p>Rows before: {{ clean_summary.original_rows }}</p>
-        <p>Rows after: {{ clean_summary.cleaned_rows }}</p>
-        <p>Missing values before: {{ clean_summary.original_missing }}</p>
-        <p>Missing values after: {{ clean_summary.cleaned_missing }}</p>
-        <ul>
-        {% for change in clean_summary.changes %}
-            <li>{{ change }}</li>
-        {% endfor %}
-        </ul>
-        <a class="download" href="/download/{{ download_file }}">Download Cleaned CSV</a>
-    {% endif %}
-</section>
-
-<section class="panel">
-    <h2>Dataset Preview</h2>
-    <div class="table-wrap">{{ preview|safe }}</div>
-</section>
-
-{% endif %}
 </main>
+
+
+<!-- ================= FOOTER ================= -->
+
+
 
 
 <footer class="site-footer">
@@ -163,10 +649,5 @@
 
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
-
-
 </body>
 </html>
-
-
-

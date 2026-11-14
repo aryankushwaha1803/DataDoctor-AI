@@ -50,6 +50,42 @@ def file_too_large(error):
 def home():
     return render_template("index.html")
 
+
+def render_analysis(file_id):
+    """Render an existing analysis using its stored dataset and results."""
+    item = analysis_data.get(file_id)
+
+    if not item:
+        flash("This analysis session has expired. Please upload your dataset again.")
+        return redirect(url_for("home"))
+
+    df = item["df"]
+    quality = analyze_data(df)
+
+    return render_template(
+        "index.html",
+        file_id=file_id,
+        filename=item["filename"],
+        quality=quality,
+        recommendations=generate_recommendations(quality),
+        dashboard=generate_dashboard(df),
+        patterns=discover_patterns(df),
+        preview=df.head(10).to_html(
+            classes="data-table", index=False, border=0
+        ),
+        answer=item.get("answer"),
+        clean_summary=item.get("clean_summary"),
+        cleaned_preview=item.get("cleaned_preview"),
+        download_file=item.get("download_file")
+    )
+
+
+@app.route("/analysis/<file_id>", methods=["GET"])
+def analysis(file_id):
+    """Display an analysis through GET so browser refresh does not repeat POST."""
+    return render_analysis(file_id)
+
+
 @app.route("/upload", methods=["POST"])
 def upload():
     file = request.files.get("file")
@@ -70,26 +106,22 @@ def upload():
 
     try:
         df = load_dataset(path)
+
         if df.empty:
             raise ValueError("The uploaded dataset is empty.")
+
+        # Validate the main analysis before saving the session.
+        quality = analyze_data(df)
+        generate_recommendations(quality)
+        generate_dashboard(df)
+        discover_patterns(df)
 
         analysis_data[file_id] = {
             "df": df,
             "filename": file.filename
         }
 
-        return render_template(
-            "index.html",
-            file_id=file_id,
-            filename=file.filename,
-            quality=analyze_data(df),
-            recommendations=generate_recommendations(analyze_data(df)),
-            dashboard=generate_dashboard(df),
-            patterns=discover_patterns(df),
-            preview=df.head(10).to_html(
-                classes="data-table", index=False, border=0
-            )
-        )
+        return redirect(url_for("analysis", file_id=file_id))
 
     except Exception as error:
         print(
@@ -97,37 +129,37 @@ def upload():
         )
         analysis_data.pop(file_id, None)
         path.unlink(missing_ok=True)
+
         flash(
             "Could not analyze this file. Please check that it is "
             "a valid, non-empty CSV or Excel file."
         )
         return redirect(url_for("home"))
 
+
 @app.route("/ask", methods=["POST"])
 def ask():
     file_id = request.form.get("file_id")
-    question = request.form.get("question", "")
+    question = request.form.get("question", "").strip()
 
     item = analysis_data.get(file_id)
+
     if not item:
         flash("Please upload your dataset again.")
         return redirect(url_for("home"))
 
-    answer = answer_question(item["df"], question)
+    if not question:
+        flash("Please enter a question for the AI assistant.")
+        return redirect(url_for("analysis", file_id=file_id))
 
-    return render_template(
-        "index.html",
-        file_id=file_id,
-        filename=item["filename"],
-        answer=answer,
-        quality=analyze_data(item["df"]),
-        recommendations=generate_recommendations(analyze_data(item["df"])),
-        dashboard=generate_dashboard(item["df"]),
-        patterns=discover_patterns(item["df"]),
-        preview=item["df"].head(10).to_html(
-            classes="data-table", index=False, border=0
-        )
-    )
+    try:
+        item["answer"] = answer_question(item["df"], question)
+    except Exception as error:
+        print(f"AI question failed: {type(error).__name__}: {error}")
+        flash("The AI assistant could not answer that question.")
+    
+    return redirect(url_for("analysis", file_id=file_id))
+
 
 @app.route("/clean", methods=["POST"])
 def clean():
@@ -138,33 +170,29 @@ def clean():
         flash("Please upload your dataset again.")
         return redirect(url_for("home"))
 
-    cleaned, summary = clean_data(
-        item["df"],
-        fill_missing=request.form.get("fill_missing") == "yes",
-        remove_duplicates=request.form.get("remove_duplicates") == "yes",
-        trim_text=request.form.get("trim_text") == "yes"
-    )
+    try:
+        cleaned, summary = clean_data(
+            item["df"],
+            fill_missing=request.form.get("fill_missing") == "yes",
+            remove_duplicates=request.form.get("remove_duplicates") == "yes",
+            trim_text=request.form.get("trim_text") == "yes"
+        )
 
-    output_path = UPLOAD_DIR / f"cleaned_{file_id}.csv"
-    cleaned.to_csv(output_path, index=False)
+        output_path = UPLOAD_DIR / f"cleaned_{file_id}.csv"
+        cleaned.to_csv(output_path, index=False)
 
-    return render_template(
-        "index.html",
-        file_id=file_id,
-        filename=item["filename"],
-        clean_summary=summary,
-        cleaned_preview=cleaned.head(10).to_html(
-            classes="data-table", index=False, border=0
-        ),
-        download_file=output_path.name,
-        quality=analyze_data(item["df"]),
-        recommendations=generate_recommendations(analyze_data(item["df"])),
-        dashboard=generate_dashboard(item["df"]),
-        patterns=discover_patterns(item["df"]),
-        preview=item["df"].head(10).to_html(
+        item["clean_summary"] = summary
+        item["cleaned_preview"] = cleaned.head(10).to_html(
             classes="data-table", index=False, border=0
         )
-    )
+        item["download_file"] = output_path.name
+
+    except Exception as error:
+        print(f"Data cleaning failed: {type(error).__name__}: {error}")
+        flash("Data cleaning failed. Please try again.")
+
+    return redirect(url_for("analysis", file_id=file_id))
+
 
 @app.route("/download/<filename>")
 def download(filename):
