@@ -1946,3 +1946,24 @@ button:hover {
 }
 
 /* ---------- END FINAL LAYOUT REPAIR ---------- */
+
+
+
+.site-footer {
+    text-align: center;
+    padding: 25px 15px;
+    margin-top: 40px;
+    border-top: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.site-footer p {
+    color: #888;
+    font-size: 13px;
+    margin: 6px 0;
+}
+
+.site-footer h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 10px 0;
+}
